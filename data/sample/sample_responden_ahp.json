@@ -1,0 +1,22 @@
+{
+  "note": "Anonymized synthetic expert weighting structure matching the 9-criteria AHP hierarchy.",
+  "consistency_ratio": 0.0082,
+  "experts": [
+    "EXPERT_01",
+    "EXPERT_02",
+    "EXPERT_03",
+    "EXPERT_04",
+    "EXPERT_05"
+  ],
+  "criteria_weights": {
+    "C1.1": 0.217,
+    "C1.2": 0.1205,
+    "C1.3": 0.0644,
+    "C2.1": 0.068,
+    "C2.2": 0.2202,
+    "C2.3": 0.0897,
+    "C3.1": 0.0977,
+    "C3.2": 0.0596,
+    "C3.3": 0.0629
+  }
+}

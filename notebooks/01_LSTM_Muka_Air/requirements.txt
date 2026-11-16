@@ -1,0 +1,12 @@
+# Dependensi Pemodelan LSTM Prediksi Tinggi Muka Air (DAS Peusangan)
+tensorflow>=2.16.0,<2.20.0
+numpy>=1.26.0,<2.2.0
+pandas>=2.2.0
+scipy>=1.13.0
+scikit-learn>=1.4.0
+matplotlib>=3.9.0
+seaborn>=0.13.0
+jupyter>=1.0.0
+ipykernel>=6.29.0
+nbformat>=5.10.0
+nbclient>=0.10.0

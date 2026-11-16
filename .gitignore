@@ -1,0 +1,41 @@
+# Python & Virtual Environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.ipynb_checkpoints/
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Local Databases & Logs
+*.sqlite
+*.sqlite3
+*.db
+peusaga_app/storage/*.log
+peusaga_app/storage/*.db
+
+# Raw / Restricted Agency & Spatial Data (Never Commit)
+data/raw/
+peusaga_app/storage/gis_pante_lhong/
+*.xlsx
+*.xls
+*.nc
+*.grib
+*.rar
+*.zip
+*.geojson
+*.shp
+*.dwg
+*.dxf
+
+# IDE & OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

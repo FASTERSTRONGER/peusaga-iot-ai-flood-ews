@@ -1,0 +1,16 @@
+method,endpoint,description,iterations,http_status,payload_bytes,min_ms,avg_ms,median_ms,p95_ms,max_ms
+GET,/,Landing Page Publik,20,200,18268,20.08,21.51,21.73,22.23,22.89
+GET,/login,Halaman Login Admin,20,200,21977,25.85,28.05,27.96,30.19,30.98
+GET,/api/status,API Publik Status 3 Node,20,200,6052,9.4,10.07,10.06,10.79,11.09
+GET,/api/gis/layers,API WebGIS (103 Blok + 2.628 Sawah CAD),20,200,3009254,108.91,121.82,120.01,134.88,163.16
+GET,/api/gis/cad-extras,API Lazy-Load CAD Sekunder,20,200,4718341,218.87,243.39,238.48,276.99,282.69
+GET,/dashboard,Dashboard Operasional WebGIS,20,200,21977,18.35,19.15,18.93,20.05,20.71
+GET,/ai-lstm,Halaman Prediksi AI-LSTM,20,200,47702,15.07,15.73,15.54,16.97,17.37
+GET,/cropdamx,Halaman Analisis AHP-CROPDAM-X,20,200,73564,14.55,15.65,15.73,16.34,16.51
+GET,/console,Halaman Konsol Teknis & LoRa,20,200,61160,15.81,16.95,16.78,17.94,18.71
+GET,/datasets,Halaman Katalog Dataset,20,200,189401,958.18,1022.64,993.8,1133.11,1148.07
+GET,/admin,Halaman Administrasi & Kalibrasi,20,200,36015,12.89,13.93,13.81,14.73,14.8
+GET,/api/telemetry?limit=50,API Telemetri Historis (50 baris),20,200,16109,8.55,9.26,9.26,9.85,9.95
+POST,/api/predict,API Inferensi Keras LSTM (node_hulu),20,200,361,70.06,75.97,75.61,83.64,84.13
+POST,/api/risk/cropdamx,API Evaluasi & Surrogate AHP-CROPDAM-X,20,200,1456,36.64,41.29,39.41,50.29,51.42
+POST,/api/lora/link-budget,API Kalkulator Link Budget LoRa,20,200,300,5.88,6.65,6.63,7.57,8.24

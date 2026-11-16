@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block title %}PEUSAGA - Informasi Banjir &amp; Kondisi Air Sawah D.I. Pante Lhong{% endblock %}
+
+{% block content %}
+<section id="visitor-hero-banner" class="visitor-hero {{ visitor_summary.banner_class }}" aria-label="Status Kondisi Air Saat Ini">
+  <div class="visitor-hero-main">
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+      <span id="visitor-alert-badge" class="badge {{ visitor_summary.badge_class }}">STATUS: {{ visitor_summary.overall_alert }}</span>
+      <span class="muted mono" style="font-size:0.82rem;">Pembaruan Terakhir: <strong id="visitor-last-updated">{{ visitor_summary.latest_seen }}</strong> WIB</span>
+    </div>
+    <h1>Pantauan Tinggi Air &amp; Peringatan Dini Banjir Sawah D.I. Pante Lhong</h1>
+    <h2 id="visitor-alert-title" class="visitor-headline">{{ visitor_summary.headline }}</h2>
+    <p id="visitor-alert-desc" class="visitor-advice">{{ visitor_summary.advice }}</p>
+    <div class="visitor-hero-actions">
+      <a href="#pantauan-titik" class="btn btn-primary">Lihat Kondisi 3 Titik Air</a>
+      <a href="#peta-pantauan" class="btn btn-secondary">Lihat Peta Sawah &amp; Sungai</a>
+      <a href="#panduan-petani" class="btn btn-ochre">Panduan Tindakan Petani</a>
+    </div>
+  </div>
+
+  <div class="visitor-hero-metrics" aria-label="Ringkasan Cuaca dan Tinggi Air">
+    <article class="kpi-card">
+      <div class="kpi-label">Tinggi Air Tertinggi Saat Ini</div>
+      <div id="visitor-max-water" class="kpi-value">{{ visitor_summary.max_water_cm }} cm</div>
+      <div class="kpi-sub">Pengukuran otomatis di lapangan</div>
+    </article>
+    <article class="kpi-card">
+      <div class="kpi-label">Perkiraan 3 Jam ke Depan</div>
+      <div id="visitor-max-pred" class="kpi-value">{{ visitor_summary.max_pred_3h_cm }} cm</div>
+      <div class="kpi-sub">Estimasi puncak aliran air berikutnya</div>
+    </article>
+    <article class="kpi-card">
+      <div class="kpi-label">Kondisi Hujan &amp; Udara</div>
+      <div id="visitor-rain-desc" class="kpi-value" style="font-size:1.12rem;">{{ visitor_summary.rain_desc }}</div>
+      <div class="kpi-sub">Curah hujan <span id="visitor-max-rain">{{ visitor_summary.max_rainfall_mm }}</span> mm | Kelembapan <span id="visitor-humidity">{{ visitor_summary.avg_humidity_pct }}</span>%</div>
+    </article>
+    <article class="kpi-card">
+      <div class="kpi-label">Cakupan Wilayah Terpantau</div>
+      <div class="kpi-value">{{ stats.total_area_ha }} ha</div>
+      <div class="kpi-sub">{{ stats.total_parcels }} petak sawah | {{ stats.total_farmer_groups }} kelompok tani</div>
+    </article>
+  </div>
+</section>
+
+<section id="pantauan-titik" style="margin-bottom:24px;">
+  <div class="section-intro">
+    <h2>Pantauan Tinggi Air &amp; Perkiraan 3 Jam ke Depan di 3 Titik Utama</h2>
+    <p class="muted">Setiap kartu menampilkan tinggi permukaan air saat ini, jarak ke batas aman tanggul, serta perkiraan tinggi air 3 jam ke depan agar petani dapat bersiap lebih awal.</p>
+  </div>
+
+  <div id="visitor-nodes-grid" class="grid-3">
+    {% for node in nodes %}
+    {% set v = node.visitor %}
+    <article
+      class="card visitor-node-card"
+      id="visitor-node-card-{{ node.node_id }}"
+      data-visitor-node="{{ node.node_id }}"
+      data-bankfull="{{ node.bankfull_level_cm or 150 }}"
+    >
+      <div class="node-card-header">
+        <div>
+          <h3>{{ v.name }}</h3>
+          <div class="muted">{{ v.area }}</div>
+        </div>
+        <span id="visitor-node-badge-{{ node.node_id }}" class="badge {{ v.alert_badge }}">{{ v.alert_level }}</span>
+      </div>
+
+      <p class="muted" style="font-size:0.86rem; margin:0 0 12px 0;">{{ v.role }}</p>
+
+      <div class="visitor-water-reading">
+        <div>
+          <span class="sensor-item-label">Tinggi Air Saat Ini</span>
+          <div id="visitor-wl-{{ node.node_id }}" class="visitor-wl-big">{{ node.last_water_level or 0 }} cm</div>
+        </div>
+        <div style="text-align:right;">
+          <span class="sensor-item-label">Batas Aman Tanggul</span>
+          <div class="mono" style="font-weight:700;">{{ "%.0f"|format(node.bankfull_level_cm or 150) }} cm</div>
+        </div>
+      </div>
+
+      <div class="water-meter-wrap">
+        <div class="water-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ v.fill_pct }}" aria-label="Kapasitas tinggi air terhadap tanggul di {{ v.name }}">
+          <div
+            id="visitor-bar-{{ node.node_id }}"
+            class="water-meter-fill {% if v.alert_level == 'AMAN' %}meter-safe{% elif v.alert_level == 'WASPADA' %}meter-warn{% elif v.alert_level == 'SIAGA' %}meter-alert{% else %}meter-danger{% endif %}"
+            style="width: {{ v.fill_pct }}%;"
+          ></div>
+        </div>
+        <div class="muted" style="font-size:0.8rem; margin-top:4px;">
+          Terisi <strong id="visitor-pct-{{ node.node_id }}">{{ v.fill_pct }}%</strong> dari batas tanggul aman
+        </div>
+      </div>
+
+      <div class="state-box visitor-forecast-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div>
+            <div class="sensor-item-label">Perkiraan 3 Jam ke Depan</div>
+            <div id="visitor-pred-{{ node.node_id }}" class="mono" style="font-size:1.1rem; font-weight:700;">{{ v.pred_3h }} cm</div>
+          </div>
+          <span id="visitor-trend-{{ node.node_id }}" class="badge {{ v.trend_badge }}">Tren: {{ v.trend_label }}</span>
+        </div>
+      </div>
+
+      <div class="muted mono" style="font-size:0.76rem; margin-top:10px;">
+        Koordinat (X, Y): X = {{ "%.6f"|format(node.longitude or 0) }}, Y = {{ "%.6f"|format(node.latitude or 0) }}
+      </div>
+      <div class="muted mono" style="font-size:0.76rem;">
+        Diperbarui: <span id="visitor-seen-{{ node.node_id }}">{{ node.last_seen or "-" }}</span>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="peta-pantauan" class="card" style="margin-bottom:24px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:10px;">
+    <div>
+      <h2>Peta Pantauan Banjir &amp; Area Sawah D.I. Pante Lhong</h2>
+      <p class="muted" style="margin:0;">Klik titik sensor atau petak sawah di peta untuk melihat nama lokasi, tingkat kerentanan genangan, dan posisi koordinat (X, Y).</p>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <label for="parcel-scenario-select" style="font-size:0.86rem; font-weight:600;">Tampilan Kondisi Genangan Sawah:</label>
+      <select id="parcel-scenario-select" class="form-control" style="width:auto;">
+        <option value="cfai_awas" selected>Hujan Deras / Siaga</option>
+        <option value="cfai_siaga">Waspada Awal</option>
+        <option value="cfai_ekstrem">Banjir Ekstrem</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="layer-bar" role="group" aria-label="Pilihan Lapisan Peta Pengunjung">
+    <label class="layer-toggle" for="layer-stage2"><input id="layer-stage2" type="checkbox" checked> 3 Titik Pantau Air Otomatis</label>
+    <label class="layer-toggle" for="layer-canals"><input id="layer-canals" type="checkbox" checked> Saluran Irigasi, Sungai &amp; Bendung</label>
+    <label class="layer-toggle" for="layer-parcels"><input id="layer-parcels" type="checkbox" checked> 2.628 Petak Sawah Rentan Genangan</label>
+    <label class="layer-toggle" for="layer-stations"><input id="layer-stations" type="checkbox"> Pos Hujan &amp; Stasiun Sungai</label>
+  </div>
+
+  <div id="peusaga-map" class="map-shell" role="region" aria-label="Peta Pantauan Banjir dan Sawah D.I. Pante Lhong"></div>
+
+  <div class="map-legend-row" aria-label="Keterangan warna risiko sawah">
+    <span class="legend-chip"><span class="legend-dot" style="background:#10B981;"></span> Aman / Risiko Rendah</span>
+    <span class="legend-chip"><span class="legend-dot" style="background:#F59E0B;"></span> Waspada / Risiko Sedang</span>
+    <span class="legend-chip"><span class="legend-dot" style="background:#EA580C;"></span> Siaga / Risiko Tinggi</span>
+    <span class="legend-chip"><span class="legend-dot" style="background:#DC2626;"></span> Awas / Risiko Sangat Tinggi</span>
+    <span class="legend-chip"><span class="legend-dot" style="background:#F59E0B; border:2px solid #1A1204;"></span> Titik Pantau Sensor Air</span>
+  </div>
+
+  <div id="map-status" class="state-box muted" style="margin-top:10px;">Memuat peta dan posisi koordinat...</div>
+</section>
+
+<section id="panduan-petani" style="margin-bottom:20px;">
+  <div class="section-intro">
+    <h2>Panduan Tindakan Petani &amp; Masyarakat</h2>
+    <p class="muted">Langkah praktis yang dapat segera dilakukan oleh petani, pengurus P3A / Keujruen Blang, dan warga sekitar aliran sungai sesuai status ketinggian air.</p>
+  </div>
+
+  <div class="grid-4">
+    <article class="card guide-card guide-safe">
+      <span class="badge badge-safe">1. STATUS AMAN</span>
+      <h3>Kondisi Normal &amp; Terkendali</h3>
+      <ul class="guide-list">
+        <li>Kelola air irigasi masuk ke petak sawah sesuai jadwal tanam rutin.</li>
+        <li>Lakukan pemupukan dan perawatan tanaman seperti biasa.</li>
+        <li>Periksa berkala kebersihan pintu air tersier agar aliran lancar.</li>
+      </ul>
+    </article>
+
+    <article class="card guide-card guide-warn">
+      <span class="badge badge-warn">2. STATUS WASPADA</span>
+      <h3>Debit Air Mulai Meningkat</h3>
+      <ul class="guide-list">
+        <li>Bersihkan rumput dan sampah di mulut saluran pembuang petak sawah.</li>
+        <li>Periksa kondisi pematang agar tidak mudah jebol saat hujan deras.</li>
+        <li>Pantau perkiraan 3 jam ke depan sebelum menabur pupuk.</li>
+      </ul>
+    </article>
+
+    <article class="card guide-card guide-alert">
+      <span class="badge badge-alert">3. STATUS SIAGA</span>
+      <h3>Siapkan Saluran Pembuang</h3>
+      <ul class="guide-list">
+        <li>Buka pintu pembuang tersier di area cekungan agar padi tidak terendam lama.</li>
+        <li>Amankan mesin pompa air, traktor tangan, dan pupuk ke tempat tinggi.</li>
+        <li>Koordinasikan pembagian pintu air bersama Keujruen Blang dan P3A.</li>
+      </ul>
+    </article>
+
+    <article class="card guide-card guide-danger">
+      <span class="badge badge-danger">4. STATUS AWAS</span>
+      <h3>Prioritas Keselamatan &amp; Mitigasi</h3>
+      <ul class="guide-list">
+        <li>Tutup pintu pemasukan air ke petak agar luapan tanggul tidak masuk ke sawah.</li>
+        <li>Jauhkan aktivitas warga, anak-anak, dan ternak dari bantaran sungai.</li>
+        <li>Ikuti arahan resmi aparatur gampong dan BPBD Kabupaten Bireuen.</li>
+      </ul>
+    </article>
+  </div>
+</section>
+{% endblock %}

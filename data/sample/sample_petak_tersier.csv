@@ -1,0 +1,21 @@
+plot_id,canal_group,area_ha,elevation_m,growth_stage,rice_variety,sample_cfai_score,risk_category
+PLOT_001,CANAL_GROUP_1,41.82,28.59,Reproduktif,Ciherang,0.4424,Sedang
+PLOT_002,CANAL_GROUP_2,28.44,9.11,Pemasakan,Mekongga,0.6718,Tinggi
+PLOT_003,CANAL_GROUP_3,20.52,8.33,Vegetatif,Inpari,0.775,Sangat Tinggi
+PLOT_004,CANAL_GROUP_4,84.23,34.35,Reproduktif,Ciherang,0.4016,Sedang
+PLOT_005,CANAL_GROUP_1,39.63,23.39,Pemasakan,Mekongga,0.4645,Sedang
+PLOT_006,CANAL_GROUP_2,17.37,39.98,Vegetatif,Inpari,0.1686,Rendah
+PLOT_007,CANAL_GROUP_3,57.06,12.26,Reproduktif,Ciherang,0.6937,Tinggi
+PLOT_008,CANAL_GROUP_4,82.0,12.09,Pemasakan,Mekongga,0.6792,Tinggi
+PLOT_009,CANAL_GROUP_1,57.65,44.84,Vegetatif,Inpari,0.2372,Rendah
+PLOT_010,CANAL_GROUP_2,46.84,42.84,Reproduktif,Ciherang,0.2082,Rendah
+PLOT_011,CANAL_GROUP_3,25.77,17.82,Pemasakan,Mekongga,0.5762,Tinggi
+PLOT_012,CANAL_GROUP_4,61.18,39.03,Vegetatif,Inpari,0.2749,Rendah
+PLOT_013,CANAL_GROUP_1,43.85,9.44,Reproduktif,Ciherang,0.6751,Tinggi
+PLOT_014,CANAL_GROUP_2,59.7,20.49,Pemasakan,Mekongga,0.4074,Sedang
+PLOT_015,CANAL_GROUP_3,72.63,31.96,Vegetatif,Inpari,0.2741,Rendah
+PLOT_016,CANAL_GROUP_4,29.03,25.31,Reproduktif,Ciherang,0.4072,Sedang
+PLOT_017,CANAL_GROUP_1,69.97,33.98,Pemasakan,Mekongga,0.2433,Rendah
+PLOT_018,CANAL_GROUP_2,73.28,9.66,Vegetatif,Inpari,0.8234,Sangat Tinggi
+PLOT_019,CANAL_GROUP_3,23.48,16.48,Reproduktif,Ciherang,0.7298,Tinggi
+PLOT_020,CANAL_GROUP_4,59.22,28.64,Pemasakan,Mekongga,0.4216,Sedang

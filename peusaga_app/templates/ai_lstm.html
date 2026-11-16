@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% block title %}PEUSAGA - Prediksi AI LSTM &amp; Klimatologi{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Prediksi Tinggi Muka Air Berbasis Stacked LSTM &amp; Klimatologi</h1>
+    <p class="muted">Eksekusi langsung model Keras terbaik (window 24 jam, 11 fitur multivariat ERA5-Land + TMA) untuk horizon t+1 hingga t+7 jam.</p>
+  </div>
+  <span class="badge {% if model_status.keras_file_exists %}badge-safe{% else %}badge-warn{% endif %}">
+    Model Keras: {{ "Siap (best_lstm_hourly_t3h.keras)" if model_status.keras_file_exists else "Mode Fallback Hidrologi" }}
+  </span>
+</div>
+
+<section style="margin-bottom:20px;">
+  <h2>Status Prediksi Real-Time Ketiga Node (Posisi Optimal D.I. Pante Lhong)</h2>
+  <div class="grid-3">
+    {% for node in nodes %}
+    {% set lp = node.latest_prediction or {} %}
+    {% set al = lp.get('alert_level', 'AMAN') %}
+    {% set al_cls = 'badge-safe' if al == 'AMAN' else ('badge-warn' if al == 'WASPADA' else ('badge-alert' if al == 'SIAGA' else 'badge-danger')) %}
+    <article class="card">
+      <div class="node-card-header">
+        <div>
+          <h3>{{ node.name }}</h3>
+          <div class="muted">{{ node.node_id }} - {{ node.location }}</div>
+          <div class="muted mono" style="font-size:0.76rem;">Koord: {{ "%.6f"|format(node.latitude or 0) }}, {{ "%.6f"|format(node.longitude or 0) }} | Bankfull: {{ "%.0f"|format(node.bankfull_level_cm or 150) }} cm</div>
+        </div>
+        <span class="badge {{ al_cls }}">{{ al }}</span>
+      </div>
+      <div class="sensor-grid">
+        <div class="sensor-item">
+          <div class="sensor-item-label">TMA Aktual</div>
+          <div class="sensor-item-val">{{ lp.get('current_water_level', node.last_water_level or 0) }} cm</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-item-label">Prediksi t+1 Jam</div>
+          <div class="sensor-item-val">{{ lp.get('pred_plus_1h', '-') }} cm</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-item-label">Prediksi t+2 Jam</div>
+          <div class="sensor-item-val">{{ lp.get('pred_plus_2h', '-') }} cm</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-item-label">Prediksi t+3 Jam</div>
+          <div class="sensor-item-val">{{ lp.get('pred_plus_3h', '-') }} cm</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-item-label">Prediksi t+6 Jam</div>
+          <div class="sensor-item-val">{{ lp.get('pred_plus_6h', '-') }} cm</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-item-label">Prediksi t+7 Jam</div>
+          <div class="sensor-item-val">{{ lp.get('pred_plus_7h', '-') }} cm</div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:10px; flex-wrap:wrap;">
+        <span class="muted mono" style="font-size:0.76rem;">Sumber: {{ lp.get('model_source', '-') }}</span>
+        <button type="button" class="btn btn-secondary btn-load-node-pred" data-node-id="{{ node.node_id }}">Tampilkan pada Grafik</button>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Simulator Inferensi Real-Time LSTM (t+1 s/d t+7 Jam)</h2>
+    <form id="lstm-predict-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="lstm-node-select">Node Acuan Data</label>
+          <select id="lstm-node-select" class="form-control">
+            {% for node in nodes %}
+            <option value="{{ node.node_id }}">{{ node.node_id }} - {{ node.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="lstm-current-cm">TMA Saat Ini (cm)</label>
+          <input id="lstm-current-cm" type="number" step="0.5" value="155" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="lstm-rain-mm">Intensitas Hujan Terkini (mm/jam)</label>
+          <input id="lstm-rain-mm" type="number" step="0.5" value="24" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="lstm-soil-pct">Lengas Tanah (%)</label>
+          <input id="lstm-soil-pct" type="number" step="1" value="72" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="lstm-hum-pct">Kelembapan Udara (%)</label>
+          <input id="lstm-hum-pct" type="number" step="1" value="88" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="lstm-bankfull-cm">Ambang Bankfull Tanggul (cm)</label>
+          <input id="lstm-bankfull-cm" type="number" step="1" value="180" class="form-control">
+        </div>
+      </div>
+      <button id="btn-run-lstm" type="submit" class="btn btn-primary">Jalankan Inferensi LSTM</button>
+    </form>
+
+    <div id="lstm-result-box" class="state-box" style="margin-top:14px;">
+      Hasil inferensi model Keras &amp; proyeksi status siaga akan muncul di sini setelah dijalankan.
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Kurva Proyeksi Multi-Horizon &amp; Ambang Bankfull</h2>
+    <div class="chart-box">
+      <canvas id="lstm-horizon-chart" aria-label="Grafik prediksi TMA t+1h hingga t+7h"></canvas>
+    </div>
+  </article>
+</section>
+
+<section class="card" style="margin-bottom:20px;">
+  <h2>Benchmark 18 Skenario Eksperimen LSTM (Harian, Per Jam, Ablasi, Lintas DAS)</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Kode Eksperimen</th>
+          <th>Skala</th>
+          <th>Fitur</th>
+          <th>Window / Horizon</th>
+          <th>Unit LSTM</th>
+          <th>RMSE (m)</th>
+          <th>MAE (m)</th>
+          <th>R2</th>
+          <th>NSE</th>
+          <th>Akurasi Siaga (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sc in scenarios %}
+        <tr>
+          <td class="mono"><strong>{{ sc.experiment_code }}</strong></td>
+          <td>{{ sc.scale_type }}</td>
+          <td class="mono">{{ sc.feature_count }}</td>
+          <td class="mono">{{ sc.window_size }} / t+{{ sc.horizon }}</td>
+          <td class="mono">{{ sc.lstm_units }}</td>
+          <td class="mono">{{ "%.4f"|format(sc.rmse_m or 0) }}</td>
+          <td class="mono">{{ "%.4f"|format(sc.mae_m or 0) }}</td>
+          <td class="mono">{{ "%.4f"|format(sc.r2_score or 0) }}</td>
+          <td class="mono">{{ "%.4f"|format(sc.nse_score or 0) }}</td>
+          <td class="mono">{{ "%.2f"|format(sc.acc_siaga_pct or 0) }}%</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="10" class="muted">Belum ada skenario evaluasi.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="grid-2" style="margin-bottom:20px;">
+  <article class="card">
+    <h2>Klimatologi Curah Hujan 6 Titik DAS Peusangan</h2>
+    <div class="chart-box">
+      <canvas id="clim-bar-chart" aria-label="Perbandingan curah hujan tahunan pada 6 titik DAS Peusangan"></canvas>
+    </div>
+  </article>
+  <article class="card">
+    <h2>Ringkasan 6 Titik Sampling BMKG &amp; ERA5-Land</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Lokasi Titik</th>
+            <th>Koordinat</th>
+            <th>Tahunan (mm)</th>
+            <th>Terbasah (mm)</th>
+            <th>Terkering (mm)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cp in clim_points %}
+          <tr>
+            <td><strong>{{ cp.point_name }}</strong></td>
+            <td class="mono">{{ cp.lat }}, {{ cp.lon }}</td>
+            <td class="mono">{{ "%.1f"|format(cp.annual_mm) }}</td>
+            <td class="mono">{{ "%.1f"|format(cp.wettest_mm) }}</td>
+            <td class="mono">{{ "%.1f"|format(cp.driest_mm) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<section class="card" style="margin-bottom:20px;">
+  <h2>Riwayat Prediksi Terbaru Ketiga Node (ai_predictions)</h2>
+  <div class="table-wrap" style="max-height:320px; overflow-y:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Node</th>
+          <th>TMA Aktual</th>
+          <th>t+1 Jam</th>
+          <th>t+2 Jam</th>
+          <th>t+3 Jam</th>
+          <th>t+6 Jam</th>
+          <th>t+7 Jam</th>
+          <th>Status Siaga</th>
+          <th>Sumber Model</th>
+          <th>Waktu WIB</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pr in latest_preds %}
+        <tr>
+          <td class="mono">#{{ pr.id }}</td>
+          <td class="mono"><strong>{{ pr.node_id }}</strong></td>
+          <td class="mono">{{ pr.current_water_level }} cm</td>
+          <td class="mono">{{ pr.pred_plus_1h }} cm</td>
+          <td class="mono">{{ pr.pred_plus_2h }} cm</td>
+          <td class="mono">{{ pr.pred_plus_3h }} cm</td>
+          <td class="mono">{{ pr.pred_plus_6h }} cm</td>
+          <td class="mono">{{ pr.pred_plus_7h }} cm</td>
+          <td>{{ pr.alert_level }}</td>
+          <td class="mono">{{ pr.model_source }}</td>
+          <td class="mono">{{ pr.created_at }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="11" class="muted">Belum ada riwayat prediksi.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Bukti Visual Eksperimen Pemodelan LSTM</h2>
+  <div class="grid-3">
+    {% for ch in charts %}
+    <figure style="margin:0;">
+      <img
+        src="{{ url_for('api_datasets_chart', rel_path=ch.rel_path) }}"
+        alt="{{ ch.description }}"
+        width="640"
+        height="360"
+        class="gallery-img"
+        loading="lazy"
+      >
+      <figcaption class="muted" style="margin-top:6px;">{{ ch.filename }}: {{ ch.description }}</figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.PEUSAGA_CLIM_POINTS = {{ clim_points | tojson }};
+  window.PEUSAGA_LATEST_PREDS = {{ latest_preds[:1] | tojson }};
+  window.PEUSAGA_NODES = {{ nodes | tojson }};
+  window.PEUSAGA_NODE_PREDS = {{ node_preds | tojson }};
+</script>
+{% endblock %}

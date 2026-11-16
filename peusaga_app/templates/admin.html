@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}PEUSAGA - Administrasi, Webhook &amp; Diseminasi{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Administrasi Sistem, Konfigurasi Webhook &amp; Diseminasi 69 Desa</h1>
+    <p class="muted">Pengelolaan akses operator, penyesuaian rasio ambang siaga banjir, dan penyebaran peringatan dini ke kelompok tani &amp; BPBD Bireuen.</p>
+  </div>
+  <span class="badge badge-safe">Total Poktan Terdaftar: {{ total_groups }}</span>
+</div>
+
+<section class="grid-2" style="margin-bottom:20px;">
+  <article class="card">
+    <h2>Autentikasi Operator / Administrator</h2>
+    <div id="auth-status-banner" class="state-box" style="margin-bottom:12px;">
+      {% if current_user %}
+      Masuk sebagai <strong>{{ current_user.username }}</strong> ({{ current_user.role }}).
+      {% else %}
+      Sesi saat ini: Mode Pengamat. Masuk menggunakan akun terdaftar di MySQL untuk menandai aksi operator.
+      {% endif %}
+    </div>
+    <form id="login-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="auth-username">Nama Pengguna</label>
+          <input id="auth-username" type="text" placeholder="username" autocomplete="username" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="auth-password">Kata Sandi</label>
+          <input id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password" class="form-control" required>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="submit" class="btn btn-primary">Masuk</button>
+        <button id="btn-logout" type="button" class="btn btn-secondary">Keluar Sesi</button>
+      </div>
+    </form>
+  </article>
+
+  <article class="card">
+    <h2>Konfigurasi Ambang Siaga &amp; Parameter Webhook</h2>
+    <form id="settings-form">
+      <div class="form-grid">
+        {% for s in settings %}
+        <div class="form-group">
+          <label for="setting-{{ s.setting_key }}">{{ s.setting_key }}</label>
+          <input
+            id="setting-{{ s.setting_key }}"
+            name="{{ s.setting_key }}"
+            type="text"
+            value="{{ s.setting_value }}"
+            class="form-control"
+          >
+          <small class="muted">{{ s.description or s.category }}</small>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
+    </form>
+    <div id="settings-feedback" class="state-box" style="margin-top:12px;">Perubahan disimpan langsung ke tabel system_settings di MySQL.</div>
+  </article>
+</section>
+
+<section class="grid-2" style="margin-bottom:20px;">
+  <article class="card">
+    <h2>Siaran Diseminasi Peringatan Dini (Telegram / WhatsApp Webhook)</h2>
+    <form id="broadcast-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="bc-channel">Kanal Pengiriman</label>
+          <select id="bc-channel" class="form-control">
+            <option value="Telegram">Telegram Bot</option>
+            <option value="WhatsApp">WhatsApp Webhook</option>
+            <option value="Internal">Log Siaran Internal</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="bc-level">Tingkat Peringatan</label>
+          <select id="bc-level" class="form-control">
+            <option value="WASPADA">WASPADA</option>
+            <option value="SIAGA" selected>SIAGA</option>
+            <option value="AWAS">AWAS (DARURAT)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="bc-recipient">Grup Penerima</label>
+          <input id="bc-recipient" type="text" value="69 Desa Kelompok Tani D.I. Pante Lhong &amp; Pusdalops BPBD" class="form-control">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label for="bc-message">Isi Pesan Peringatan &amp; Instruksi Mitigasi</label>
+        <textarea id="bc-message" class="form-control">Peringatan PEUSAGA: Prediksi LSTM t+3 jam menunjukkan elevasi TMA mendekati ambang tanggul. Petak fase reproduktif diminta membuka saluran pembuang tersier.</textarea>
+      </div>
+      <button type="submit" class="btn btn-ochre">Kirim Peringatan Sekarang</button>
+    </form>
+    <div id="bc-feedback" class="state-box" style="margin-top:12px;">Peringatan tercatat pada riwayat diseminasi serta dipancarkan ke dashboard melalui SSE.</div>
+  </article>
+
+  <article class="card">
+    <h2>Riwayat Siaran Diseminasi ({{ broadcasts|length }} Terbaru)</h2>
+    <div class="table-wrap" style="max-height:360px; overflow-y:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Waktu</th>
+            <th>Kanal</th>
+            <th>Tingkat</th>
+            <th>Status</th>
+            <th>Pesan</th>
+          </tr>
+        </thead>
+        <tbody id="broadcast-tbody">
+          {% for b in broadcasts %}
+          <tr>
+            <td class="mono">{{ b.created_at }}</td>
+            <td class="mono">{{ b.channel }}</td>
+            <td><span class="badge {% if b.alert_level == 'AWAS' %}badge-danger{% elif b.alert_level == 'SIAGA' %}badge-alert{% else %}badge-warn{% endif %}">{{ b.alert_level }}</span></td>
+            <td class="mono">{{ b.status }}</td>
+            <td>{{ b.message_text }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="muted">Belum ada siaran peringatan dikirimkan.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Daftar Akun Terdaftar (MySQL)</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Nama Lengkap</th>
+            <th>Peran</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td class="mono"><strong>{{ u.username }}</strong></td>
+            <td>{{ u.full_name }}</td>
+            <td>{{ u.role }}</td>
+            <td><span class="badge {% if u.is_active %}badge-safe{% else %}badge-warn{% endif %}">{{ "Aktif" if u.is_active else "Nonaktif" }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Direktori Kelompok Tani (Sampel 100 dari {{ total_groups }} Kelompok)</h2>
+    <div class="table-wrap" style="max-height:320px; overflow-y:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Kecamatan</th>
+            <th>Desa / Gampong</th>
+            <th>Nama Kelompok Tani</th>
+            <th>Anggota</th>
+            <th>Kanal Kontak</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for g in groups %}
+          <tr>
+            <td>{{ g.kecamatan }}</td>
+            <td>{{ g.desa }}</td>
+            <td><strong>{{ g.poktan_name }}</strong></td>
+            <td class="mono">{{ g.member_count }}</td>
+            <td class="mono">{{ g.contact_channel }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+{% endblock %}

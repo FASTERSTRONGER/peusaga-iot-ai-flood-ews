@@ -1,0 +1,13 @@
+Tautan_Radio,Jarak_km,Kondisi_Cuaca,Hujan_mm_jam,Spreading_Factor,Payload_Byte,ToA_ms,RSSI_Mean_dBm,RSSI_P05_dBm,SNR_Mean_dB,Link_Margin_dB,PDR_Simulasi_Pct
+Hop-1 (node_hulu -> node_hilir),8.228,Cerah / Berawan,0.0,SF9,42,287.7,-92.12,-96.2,24.91,36.88,100.0
+Hop-1 (node_hulu -> node_hilir),8.228,Hujan Sedang,20.0,SF9,42,287.7,-94.57,-99.89,22.46,34.43,100.0
+Hop-1 (node_hulu -> node_hilir),8.228,Hujan Lebat,50.0,SF9,42,287.7,-96.94,-103.12,20.09,32.06,100.0
+Hop-1 (node_hulu -> node_hilir),8.228,Badai Ekstrem 2025,100.0,SF9,42,287.7,-99.67,-106.68,17.36,29.33,100.0
+Hop-2 (node_hilir -> node_gateway),2.539,Cerah / Berawan,0.0,SF9,88,492.5,-79.65,-83.68,37.38,49.35,100.0
+Hop-2 (node_hilir -> node_gateway),2.539,Hujan Sedang,20.0,SF9,88,492.5,-82.17,-87.56,34.86,46.83,100.0
+Hop-2 (node_hilir -> node_gateway),2.539,Hujan Lebat,50.0,SF9,88,492.5,-84.45,-90.8,32.58,44.55,100.0
+Hop-2 (node_hilir -> node_gateway),2.539,Badai Ekstrem 2025,100.0,SF9,88,492.5,-87.18,-93.75,29.85,41.82,100.0
+Direct Tanpa Relay (Hulu -> Gateway),10.763,Cerah / Berawan,0.0,SF9,42,287.7,-118.09,-122.14,-1.06,10.91,100.0
+Direct Tanpa Relay (Hulu -> Gateway),10.763,Hujan Sedang,20.0,SF9,42,287.7,-120.53,-125.9,-3.5,8.47,99.58
+Direct Tanpa Relay (Hulu -> Gateway),10.763,Hujan Lebat,50.0,SF9,42,287.7,-122.89,-129.14,-5.86,6.11,94.58
+Direct Tanpa Relay (Hulu -> Gateway),10.763,Badai Ekstrem 2025,100.0,SF9,42,287.7,-125.51,-132.44,-8.48,3.49,79.36

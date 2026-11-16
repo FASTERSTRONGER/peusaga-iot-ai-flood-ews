@@ -1,0 +1,13 @@
+Risk_Class_CFAI,Phenological_Stage,LSTM_Lead_Time,Operational_Mitigation_Recommendation
+Low,Vegetative,3 - 7 hours,Routine IoT sensor and sluice gate monitoring; keep tertiary drainage channels clear.
+Low,Reproductive,3 - 7 hours,Standby water-level monitoring; inspect tertiary plot embankments.
+Low,Ripening,3 - 7 hours,Proceed with pre-harvest field drainage schedule according to planting calendar.
+Moderate,Vegetative,3 - 7 hours,Open tertiary drain gates; postpone top-dressing fertilization until flood recedes.
+Moderate,Reproductive,3 - 7 hours,Activate emergency drainage; deploy portable pumps in low-elevation plots.
+Moderate,Ripening,3 - 7 hours,Accelerate harvesting on plots ready for harvest (>85% yellowed grains).
+High,Vegetative,3 - 7 hours,Close D.I. Pante Lhong intake gates; open all drainage sluice gates to maximum capacity.
+High,Reproductive,3 - 7 hours,Issue early warning to farmer groups; evacuate farm machinery and prepare replanting plans.
+High,Ripening,3 - 7 hours,Mobilize early emergency harvest within the 3-7h lead-time window prior to flood peak.
+Very High,Vegetative,3 - 7 hours,"ALERT Status: Shut down irrigation network completely, evacuate machinery and livestock, activate BPBD protocol."
+Very High,Reproductive,3 - 7 hours,ALERT Status: Evacuate productive assets and livestock; initiate D.I. Pante Lhong crop failure claim logging.
+Very High,Ripening,3 - 7 hours,"ALERT Status: Evacuate personnel, livestock, and emergency-harvested grain to safe high ground."

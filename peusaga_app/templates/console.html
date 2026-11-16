@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% block title %}PEUSAGA - Konsol Teknik IoT LoRa &amp; Kalibrasi{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Konsol Teknik IoT LoRa 915 MHz, Kalibrasi Sensor &amp; Karantina</h1>
+    <p class="muted">Simulasi link budget radio, otonomi daya baterai Li-ion 3S + panel surya, kalibrasi JSN-SR04T, pengujian ingesti paket Arduino, dan inspeksi karantina SOS.</p>
+  </div>
+</div>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Kalibrasi Sensor Per Node</h2>
+    <form id="calibration-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="cal-node-id">Pilih Node IoT (Posisi Pante Lhong)</label>
+          <select id="cal-node-id" class="form-control">
+            {% for n in nodes %}
+            <option value="{{ n.node_id }}">{{ n.node_id }} - {{ n.name }}</option>
+            {% else %}
+            {% for cal in calibrations %}
+            <option value="{{ cal.node_id }}">{{ cal.node_id }}</option>
+            {% endfor %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cal-pole-cm">Tinggi Tiang Sensor (cm)</label>
+          <input id="cal-pole-cm" type="number" step="0.5" value="450" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="cal-offset-cm">Offset TMA (cm)</label>
+          <input id="cal-offset-cm" type="number" step="0.1" value="5.0" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="cal-bankfull-cm">Ambang Bankfull Tanggul (cm)</label>
+          <input id="cal-bankfull-cm" type="number" step="1" value="180" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="cal-rain-mult">Pengali Tipping Bucket</label>
+          <input id="cal-rain-mult" type="number" step="0.01" value="1.1" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="cal-soil-air">ADC Tanah Kering / Basah</label>
+          <div style="display:flex; gap:6px;">
+            <input id="cal-soil-air" type="number" value="3200" class="form-control" aria-label="ADC Tanah Kering">
+            <input id="cal-soil-water" type="number" value="1400" class="form-control" aria-label="ADC Tanah Basah">
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan Kalibrasi ke MySQL</button>
+    </form>
+    <div id="cal-feedback" class="state-box" style="margin-top:12px;">Siap memperbarui parameter kalibrasi node.</div>
+  </article>
+
+  <article class="card">
+    <h2>Simulator Ingesti Paket Arduino / Darurat SOS</h2>
+    <form id="sim-packet-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="sim-node">Node Pengirim</label>
+          <select id="sim-node" class="form-control">
+            <option value="node_hulu">node_hulu - Mercu &amp; Intake Bendung Pante Lhong</option>
+            <option value="node_hilir">node_hilir - Simpul Sekunder BPL &amp; Sawah Aktif</option>
+            <option value="node_gateway">node_gateway - Dataran Rendah Hilir Kota Juang</option>
+            <option value="all">Semua 3 Node Sekaligus (Simulasi Koridor)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sim-mode">Jenis Paket</label>
+          <select id="sim-mode" class="form-control">
+            <option value="normal">Telemetri Sensor Normal</option>
+            <option value="sos">Siaran Darurat SOS (Karantina)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sim-wl">TMA Simulasi (cm)</label>
+          <input id="sim-wl" type="number" step="0.5" value="162.5" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="sim-rain">Curah Hujan (mm)</label>
+          <input id="sim-rain" type="number" step="0.5" value="28.0" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="sim-rssi">RSSI LoRa (dBm)</label>
+          <input id="sim-rssi" type="number" step="1" value="-79" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="sim-sos-msg">Pesan SOS (Jika mode SOS)</label>
+          <input id="sim-sos-msg" type="text" value="Siaga banjir bandang koridor Pante Lhong" class="form-control">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-ochre">Kirim Paket ke Pipeline /api</button>
+    </form>
+    <div id="sim-feedback" class="state-box" style="margin-top:12px;">Siap menguji ingesti paket telemetri &amp; pemicu SSE.</div>
+  </article>
+</section>
+
+<section class="grid-2" style="margin-bottom:20px;">
+  <article class="card">
+    <h2>Kalkulator Link Budget LoRa 915 MHz &amp; Zona Fresnel</h2>
+    <form id="lora-calc-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="lora-dist">Jarak Tautan (km)</label>
+          <input id="lora-dist" type="number" step="0.1" value="7.387" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="lora-rain">Intensitas Hujan (mm/jam)</label>
+          <input id="lora-rain" type="number" step="1" value="50" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="lora-sf">Spreading Factor (SF)</label>
+          <select id="lora-sf" class="form-control">
+            <option value="7">SF7</option>
+            <option value="8">SF8</option>
+            <option value="9" selected>SF9 (Optimal)</option>
+            <option value="10">SF10</option>
+            <option value="11">SF11</option>
+            <option value="12">SF12</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="lora-tx">Daya Pancar TX (dBm)</label>
+          <input id="lora-tx" type="number" step="1" value="20" class="form-control">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Hitung Link Budget</button>
+    </form>
+    <div id="lora-result-box" class="state-box" style="margin-top:12px;">Siap menghitung FSPL, RSSI, Link Margin, Time-on-Air, dan clearance Fresnel Z1.</div>
+  </article>
+
+  <article class="card">
+    <h2>Simulator Otonomi Daya Panel Surya &amp; Baterai 3S Li-ion</h2>
+    <form id="power-calc-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="pwr-wh">Kapasitas Baterai (Wh)</label>
+          <input id="pwr-wh" type="number" step="0.1" value="57.72" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="pwr-load">Beban Rata-rata (W)</label>
+          <input id="pwr-load" type="number" step="0.01" value="0.6804" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="pwr-wp">Kapasitas Panel Surya (Wp)</label>
+          <input id="pwr-wp" type="number" step="1" value="10" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="pwr-days">Hari Mendung Tanpa Matahari</label>
+          <input id="pwr-days" type="number" step="1" value="3" class="form-control">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Simulasikan Otonomi Daya</button>
+    </form>
+    <div id="power-result-box" class="state-box" style="margin-top:12px;">Target otonomi minimum sistem adalah 72 jam tanpa matahari.</div>
+  </article>
+</section>
+
+<section class="grid-2" style="margin-bottom:20px;">
+  <article class="card">
+    <h2>Karantina Paket Non-Standar &amp; Darurat SOS ({{ dumps|length }} Terbaru)</h2>
+    <div class="table-wrap" style="max-height:360px; overflow-y:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Sumber</th>
+            <th>Tipe</th>
+            <th>Status SOS</th>
+            <th>Isi / Muatan</th>
+            <th>Waktu WIB</th>
+          </tr>
+        </thead>
+        <tbody id="dumps-tbody">
+          {% for d in dumps %}
+          <tr>
+            <td class="mono">#{{ d.id }}</td>
+            <td class="mono">{{ d.source_identifier }}</td>
+            <td class="mono">{{ d.message_type }}</td>
+            <td><span class="badge {% if d.is_emergency %}badge-danger{% else %}badge-warn{% endif %}">{{ "SOS DARURAT" if d.is_emergency else "Karantina" }}</span></td>
+            <td>{{ d.emergency_text or d.raw_payload }}</td>
+            <td class="mono">{{ d.created_at }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="muted">Belum ada paket karantina.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Audit Log Transaksi HTTP Ingesti ({{ logs|length }} Terbaru)</h2>
+    <div class="table-wrap" style="max-height:360px; overflow-y:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Metode</th>
+            <th>Path</th>
+            <th>Status</th>
+            <th>Latensi</th>
+            <th>Tipe Payload</th>
+            <th>Waktu WIB</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in logs %}
+          <tr>
+            <td class="mono">#{{ l.id }}</td>
+            <td class="mono">{{ l.method }}</td>
+            <td class="mono">{{ l.path }}</td>
+            <td><span class="badge {% if (l.response_status or 200) < 300 %}badge-safe{% elif (l.response_status or 200) < 400 %}badge-warn{% else %}badge-danger{% endif %}">{{ l.response_status }}</span></td>
+            <td class="mono">{{ "%.1f"|format(l.duration_ms or 0) }} ms</td>
+            <td class="mono">{{ l.payload_type }}</td>
+            <td class="mono">{{ l.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<section class="card">
+  <h2>Grafik Validasi Jaringan LoRa &amp; Otonomi Daya IoT</h2>
+  <div class="grid-3">
+    {% for ch in charts %}
+    <figure style="margin:0;">
+      <img
+        src="{{ url_for('api_datasets_chart', rel_path=ch.rel_path) }}"
+        alt="{{ ch.description }}"
+        width="640"
+        height="360"
+        class="gallery-img"
+        loading="lazy"
+      >
+      <figcaption class="muted" style="margin-top:6px;">{{ ch.filename }}: {{ ch.description }}</figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.PEUSAGA_CALIBRATIONS = {{ calibrations | tojson }};
+</script>
+{% endblock %}

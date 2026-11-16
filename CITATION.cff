@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software or sample dataset in your research, please cite it using the metadata below."
+title: "PEUSAGA: IoT-AI Flood Early Warning and Crop Failure Risk Mitigation System"
+type: software
+authors:
+  - family-names: "PEUSAGA Research Team"
+    affiliation: "Magister Teknologi Informasi, Fakultas Teknik, Universitas Malikussaleh"
+keywords:
+  - flood early warning system
+  - LSTM
+  - IoT LoRa
+  - AHP
+  - crop damage mitigation
+  - WebGIS
+license: MIT
+year: 2026

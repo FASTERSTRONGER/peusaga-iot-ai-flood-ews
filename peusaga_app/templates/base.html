@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PEUSAGA - Agro-Hidrologi DAS Peusangan{% endblock %}</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon-16.png') }}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/peusaga.css') }}">
+  <script>
+    (function () {
+      var saved = localStorage.getItem("peusaga_theme") || "light";
+      document.documentElement.setAttribute("data-theme", saved);
+    })();
+  </script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Loncat ke konten utama</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="{{ url_for('page_landing') }}" class="brand-wrap">
+        <span class="brand-logo-box">
+          <img
+            src="{{ url_for('static', filename='img/logo_peusaga.png') }}"
+            alt="Logo PEUSAGA"
+            width="38"
+            height="38"
+          >
+        </span>
+        <span>
+          <span class="brand-title">PEUSAGA</span><br>
+          <span class="brand-sub">DAS Peusangan &amp; D.I. Pante Lhong</span>
+        </span>
+      </a>
+
+      <nav class="main-nav" aria-label="Navigasi Utama">
+        {% if is_authenticated %}
+        <a href="{{ url_for('page_landing') }}" class="nav-link {% if active_page == 'landing' %}active{% endif %}">Beranda Publik</a>
+        <a href="{{ url_for('page_dashboard') }}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">Dashboard Operasional</a>
+        <a href="{{ url_for('page_ai_lstm') }}" class="nav-link {% if active_page == 'ai_lstm' %}active{% endif %}">Prediksi LSTM</a>
+        <a href="{{ url_for('page_cropdamx') }}" class="nav-link {% if active_page == 'cropdamx' %}active{% endif %}">AHP-CROPDAM-X</a>
+        <a href="{{ url_for('page_console') }}" class="nav-link {% if active_page == 'console' %}active{% endif %}">Konsol IoT LoRa</a>
+        <a href="{{ url_for('page_datasets') }}" class="nav-link {% if active_page == 'datasets' %}active{% endif %}">Katalog Dataset</a>
+        <a href="{{ url_for('page_admin') }}" class="nav-link {% if active_page == 'admin' %}active{% endif %}">Admin &amp; Peringatan</a>
+        {% else %}
+        <a href="{{ url_for('page_landing') }}" class="nav-link {% if active_page == 'landing' %}active{% endif %}">Beranda</a>
+        <a href="{{ url_for('page_landing') }}#pantauan-titik" class="nav-link">Pantauan 3 Titik</a>
+        <a href="{{ url_for('page_landing') }}#peta-pantauan" class="nav-link">Peta Banjir &amp; Sawah</a>
+        <a href="{{ url_for('page_landing') }}#panduan-petani" class="nav-link">Panduan Petani</a>
+        {% endif %}
+      </nav>
+
+      <div class="header-controls">
+        <span id="sse-status-pill" class="stream-pill" aria-live="polite">Pantauan Aktif</span>
+        {% if is_authenticated %}
+        <button id="btn-stream-toggle" type="button" class="btn-header" aria-pressed="false">Jeda Stream</button>
+        {% endif %}
+        <button id="btn-theme-toggle" type="button" class="btn-header" aria-label="Ganti tema tampilan">Tema Gelap</button>
+        {% if is_authenticated %}
+        <span class="stream-pill" title="Akun aktif">{{ current_user.username }} ({{ current_user.role }})</span>
+        <a href="{{ url_for('page_logout') }}" class="btn-header btn-header-link">Keluar</a>
+        {% else %}
+        <a href="{{ url_for('page_login') }}" class="btn-header btn-header-login {% if active_page == 'login' %}active{% endif %}">Masuk Admin</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="main-container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>PEUSAGA: Model Peringatan Dini Banjir Berbasis IoT-AI untuk Mitigasi Risiko Gagal Panen di DAS Peusangan</span>
+      <span>Copyright &copy; 2026</span>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin=""></script>
+  <script src="{{ url_for('static', filename='js/peusaga.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

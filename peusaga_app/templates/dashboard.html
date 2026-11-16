@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}PEUSAGA - Dashboard &amp; WebGIS Multi-Layer{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Dashboard Pemantauan Real-Time &amp; WebGIS DAS Peusangan</h1>
+    <p class="muted">Integrasi telemetri IoT LoRa 915 MHz, proyeksi muka air LSTM (t+3 jam), dan peta risiko 103 petak tersier D.I. Pante Lhong.</p>
+  </div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <button id="btn-dash-simulate" type="button" class="btn btn-primary">Simulasi Telemetri &amp; Prediksi 3 Node</button>
+    <a href="{{ url_for('page_cropdamx') }}" class="btn btn-ochre">Analisis Risiko CFAI</a>
+  </div>
+</div>
+
+<section class="grid-kpi" aria-label="Ringkasan Indikator Utama">
+  <article class="kpi-card">
+    <div class="kpi-label">Rekaman Telemetri IoT</div>
+    <div id="kpi-tel-count" class="kpi-value">{{ stats.total_telemetry }}</div>
+    <div class="kpi-sub">Basis data MySQL terintegrasi</div>
+  </article>
+  <article class="kpi-card">
+    <div class="kpi-label">Prediksi LSTM (t+3 Jam)</div>
+    <div id="kpi-pred-val" class="kpi-value" style="font-size:1.05rem; line-height:1.45;">
+      Hulu: <span data-kpi-pred="node_hulu">{{ node_preds.get('node_hulu', {}).get('pred_plus_3h', '-') }}</span> cm<br>
+      Hilir: <span data-kpi-pred="node_hilir">{{ node_preds.get('node_hilir', {}).get('pred_plus_3h', '-') }}</span> | GW: <span data-kpi-pred="node_gateway">{{ node_preds.get('node_gateway', {}).get('pred_plus_3h', '-') }}</span> cm
+    </div>
+    <div id="kpi-pred-status" class="kpi-sub">
+      Siaga: Hulu <span data-kpi-alert="node_hulu">{{ node_preds.get('node_hulu', {}).get('alert_level', '-') }}</span> /
+      Hilir <span data-kpi-alert="node_hilir">{{ node_preds.get('node_hilir', {}).get('alert_level', '-') }}</span> /
+      GW <span data-kpi-alert="node_gateway">{{ node_preds.get('node_gateway', {}).get('alert_level', '-') }}</span>
+    </div>
+  </article>
+  <article class="kpi-card">
+    <div class="kpi-label">Indeks Kerentanan CFAI</div>
+    <div id="kpi-cfai-val" class="kpi-value">{{ latest_crop.cfai_score or "-" }}</div>
+    <div id="kpi-cfai-cat" class="kpi-sub">Kategori: {{ latest_crop.risk_category or "-" }}</div>
+  </article>
+  <article class="kpi-card">
+    <div class="kpi-label">Cakupan Petak Tersier</div>
+    <div class="kpi-value">{{ stats.total_parcels }} Petak</div>
+    <div class="kpi-sub">{{ stats.total_area_ha }} ha (D.I. Pante Lhong)</div>
+  </article>
+  <article class="kpi-card">
+    <div class="kpi-label">Kelompok Tani Penerima</div>
+    <div class="kpi-value">{{ stats.total_farmer_groups }} Poktan</div>
+    <div class="kpi-sub">69 desa jaringan diseminasi</div>
+  </article>
+  <article class="kpi-card">
+    <div class="kpi-label">Riwayat Banjir BPBD</div>
+    <div class="kpi-value">{{ stats.total_flood_events }} Kejadian</div>
+    <div class="kpi-sub">Referensi kalibrasi Bireuen</div>
+  </article>
+</section>
+
+<section class="card" style="margin-bottom:20px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:10px;">
+    <h2>Peta WebGIS Multi-Layer DAS Peusangan &amp; D.I. Pante Lhong</h2>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <label for="parcel-scenario-select" style="font-size:0.86rem; font-weight:600;">Skenario Pewarnaan Petak:</label>
+      <select id="parcel-scenario-select" class="form-control" style="width:auto;">
+        <option value="cfai_awas" selected>Awas (65 cm / 36 jam)</option>
+        <option value="cfai_siaga">Siaga (30 cm / 12 jam)</option>
+        <option value="cfai_ekstrem">Ekstrem (110 cm / 72 jam)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="layer-bar" role="group" aria-label="Kontrol Lapisan Peta WebGIS">
+    <label class="layer-toggle" for="layer-stage2"><input id="layer-stage2" type="checkbox" checked> 3 Node IoT &amp; Koridor LoRa Pante Lhong (10,439 km)</label>
+    <label class="layer-toggle" for="layer-canals"><input id="layer-canals" type="checkbox" checked> Saluran, Sungai &amp; Bendung</label>
+    <label class="layer-toggle" for="layer-parcels"><input id="layer-parcels" type="checkbox" checked> 2.628 Petak Sawah CAD (CFAI)</label>
+    <label class="layer-toggle" for="layer-landuse"><input id="layer-landuse" type="checkbox"> Tata Guna Lahan CAD</label>
+    <label class="layer-toggle" for="layer-infra"><input id="layer-infra" type="checkbox"> Jalan &amp; Kontur Topografi CAD</label>
+    <label class="layer-toggle" for="layer-climate"><input id="layer-climate" type="checkbox"> 6 Titik ERA5 &amp; BMKG</label>
+    <label class="layer-toggle" for="layer-stations"><input id="layer-stations" type="checkbox"> Stasiun AWLR &amp; ARR</label>
+    <label class="layer-toggle" for="layer-survey"><input id="layer-survey" type="checkbox"> 26 Titik Survei</label>
+  </div>
+
+  <div id="peusaga-map" class="map-shell" role="region" aria-label="Peta Interaktif DAS Peusangan"></div>
+  <div id="map-status" class="state-box muted" style="margin-top:10px;">Memuat lapisan geospasial...</div>
+</section>
+
+<section style="margin-bottom:20px;">
+  <h2>Status &amp; Prediksi AI LSTM Ketiga Node Sensor IoT LoRa (Posisi Optimal D.I. Pante Lhong)</h2>
+  <div id="nodes-container" class="grid-3">
+    {% for node in nodes %}
+    {% set lp = node.latest_prediction or {} %}
+    {% set al = lp.get('alert_level', 'AMAN') %}
+    {% set al_cls = 'badge-safe' if al == 'AMAN' else ('badge-warn' if al == 'WASPADA' else ('badge-alert' if al == 'SIAGA' else 'badge-danger')) %}
+    <article class="card" data-node-card="{{ node.node_id }}">
+      <div class="node-card-header">
+        <div>
+          <h3>{{ node.name }}</h3>
+          <div class="muted">{{ node.node_id }} - {{ node.location }}</div>
+          <div class="muted mono" style="font-size:0.76rem; margin-top:2px;">
+            Koord: {{ "%.6f"|format(node.latitude or 0) }}, {{ "%.6f"|format(node.longitude or 0) }} ({{ "%.2f"|format(node.elevation_m or 0) }} mdpl) | Tiang: {{ "%.0f"|format(node.pole_height_cm or 300) }} cm
+          </div>
+        </div>
+        <span class="badge {% if node.status == 'online' %}badge-safe{% else %}badge-warn{% endif %}" data-node-status>{{ node.status | upper }}</span>
+      </div>
+      <div class="sensor-grid">
+        <div class="sensor-item">
+          <div class="sensor-item-label">Tinggi Muka Air</div>
+          <div class="sensor-item-val" data-field="water_level">{{ node.last_water_level or 0 }} cm</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-item-label">Curah Hujan</div>
+          <div class="sensor-item-val" data-field="rainfall">{{ node.last_rainfall or 0 }} mm</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-item-label">Kelembaban Tanah</div>
+          <div class="sensor-item-val" data-field="soil_moisture">{{ node.last_soil_moisture or 0 }} %</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-item-label">Baterai Li-ion 3S</div>
+          <div class="sensor-item-val" data-field="battery">{{ node.last_battery or 0 }} V ({{ node.last_battery_soc or 0 }}%)</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-item-label">Suhu Udara / Air</div>
+          <div class="sensor-item-val" data-field="temp">{{ node.last_air_temp or 0 }} / {{ node.last_water_temp or 0 }} C</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-item-label">Sinyal LoRa 915 MHz</div>
+          <div class="sensor-item-val" data-field="rssi">{{ node.last_rssi or 0 }} dBm ({{ node.last_signal_quality or 0 }}%)</div>
+        </div>
+      </div>
+
+      <div class="state-box" style="margin-top:10px; padding:10px 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
+          <strong style="font-size:0.84rem;">Proyeksi AI LSTM Per Node (Bankfull {{ "%.0f"|format(node.bankfull_level_cm or 150) }} cm)</strong>
+          <span class="badge {{ al_cls }}" data-field="pred_alert">{{ al }}</span>
+        </div>
+        <div class="mono" style="font-size:0.82rem; display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px;">
+          <div>t+1j: <strong data-field="pred_1h">{{ lp.get('pred_plus_1h', '-') }}</strong> cm</div>
+          <div>t+2j: <strong data-field="pred_2h">{{ lp.get('pred_plus_2h', '-') }}</strong> cm</div>
+          <div>t+3j: <strong data-field="pred_3h">{{ lp.get('pred_plus_3h', '-') }}</strong> cm</div>
+          <div>t+6j: <strong data-field="pred_6h">{{ lp.get('pred_plus_6h', '-') }}</strong> cm</div>
+          <div>t+7j: <strong data-field="pred_7h">{{ lp.get('pred_plus_7h', '-') }}</strong> cm</div>
+          <div class="muted" data-field="pred_source">{{ lp.get('model_source', '-') }}</div>
+        </div>
+      </div>
+
+      <div class="muted mono" style="margin-top:8px; font-size:0.78rem;">Terakhir diterima: <span data-field="last_seen">{{ node.last_seen or "-" }}</span> | Paket: <span data-field="packets">{{ node.packets_received }}</span></div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Grafik Hidrograf Telemetri Terkini</h2>
+    <div class="chart-box">
+      <canvas id="dash-hydro-chart" aria-label="Grafik perubahan tinggi muka air dan curah hujan"></canvas>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Aliran Paket Telemetri Terbaru</h2>
+    <div id="dash-stream-feedback" class="muted" style="margin-bottom:8px;">Menampilkan 15 rekaman terbaru dari MySQL.</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Node</th>
+            <th>TMA (cm)</th>
+            <th>Hujan (mm)</th>
+            <th>RSSI</th>
+            <th>Waktu WIB</th>
+          </tr>
+        </thead>
+        <tbody id="telemetry-tbody">
+          {% for row in recent_tel %}
+          <tr>
+            <td class="mono">#{{ row.id }}</td>
+            <td class="mono">{{ row.node_id }}</td>
+            <td class="mono">{{ row.water_level }}</td>
+            <td class="mono">{{ row.rainfall }}</td>
+            <td class="mono">{{ row.rssi }} dBm</td>
+            <td class="mono">{{ row.created_at }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="muted">Belum ada rekaman telemetri tersedia.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+{% endblock %}

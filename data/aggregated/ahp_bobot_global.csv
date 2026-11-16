@@ -1,0 +1,10 @@
+Criteria_Code,Main_Criteria,Criteria_Weight,Subcriteria_CR,Subcriteria_Code,Subcriteria,Local_Weight,Global_Weight
+C1,Flood Characteristics,0.4019,6e-05,C1.1,Inundation Depth,0.496,0.1994
+C1,Flood Characteristics,0.4019,6e-05,C1.2,Inundation Duration,0.3338,0.1341
+C1,Flood Characteristics,0.4019,6e-05,C1.3,Flow Velocity,0.1702,0.0684
+C2,Crop Growth Stage,0.349,5e-05,C2.1,Vegetative (V1-V12),0.2521,0.088
+C2,Crop Growth Stage,0.349,5e-05,C2.2,Reproductive (R1-R6),0.5785,0.2019
+C2,Crop Growth Stage,0.349,5e-05,C2.3,Ripening (R7-R9),0.1695,0.0591
+C3,Land Conditions,0.2491,0.0,C3.1,Topography,0.3,0.0747
+C3,Land Conditions,0.2491,0.0,C3.2,Drainage Capacity,0.4498,0.112
+C3,Land Conditions,0.2491,0.0,C3.3,Distance from River,0.2502,0.0623

@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block title %}PEUSAGA - AHP-CROPDAM-X &amp; 103 Petak Tersier{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Sistem Pendukung Keputusan AHP-CROPDAM-X &amp; 103 Petak Tersier</h1>
+    <p class="muted">Evaluasi Indeks Kerentanan Banjir Tanaman Padi (CFAI), Surrogate Random Forest + Bayesian Ridge, uji sensitivitas bobot pakar, dan mitigasi per fase fenologi.</p>
+  </div>
+  <span class="badge badge-safe">Konsistensi AHP 5 Pakar: CR = 0.00000</span>
+</div>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Kalkulator Risiko CFAI &amp; Surrogate Model</h2>
+    <form id="cropdamx-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="cx-depth">Kedalaman Genangan (cm)</label>
+          <input id="cx-depth" type="number" step="1" value="65" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="cx-duration">Durasi Genangan (jam)</label>
+          <input id="cx-duration" type="number" step="1" value="36" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="cx-velocity">Kecepatan Arus (km/jam)</label>
+          <input id="cx-velocity" type="number" step="0.1" value="5.0" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="cx-stage">Fase Fenologi Padi</label>
+          <select id="cx-stage" class="form-control">
+            <option value="Vegetatif">Vegetatif</option>
+            <option value="Reproduktif" selected>Reproduktif (Paling Kritis)</option>
+            <option value="Pemasakan">Pemasakan / Pra-Panen</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cx-variety">Varietas Padi</label>
+          <select id="cx-variety" class="form-control">
+            <option value="Ciherang" selected>Ciherang (Standar)</option>
+            <option value="Inpari">Inpari Sub-1 (Toleran Rendaman)</option>
+            <option value="Mekongga">Mekongga (Rentan Rebah)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cx-modulus">Modulus Drainase (l/dt/ha)</label>
+          <input id="cx-modulus" type="number" step="0.01" value="0.526" class="form-control">
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btn-run-cropdamx" type="submit" class="btn btn-primary">Hitung CFAI &amp; Surrogate</button>
+        <label class="layer-toggle" for="cx-save-db" style="min-height:44px;">
+          <input id="cx-save-db" type="checkbox"> Simpan hasil ke MySQL
+        </label>
+      </div>
+    </form>
+
+    <div id="cropdamx-result-box" class="state-box" style="margin-top:14px;">
+      Masukkan parameter genangan dan fase pertumbuhan untuk menghitung skor CFAI, estimasi Random Forest, serta ketidakpastian Bayesian sigma.
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Struktur Bobot Global AHP (9 Sub-Kriteria)</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Kriteria Utama</th>
+            <th>Sub-Kriteria</th>
+            <th>Bobot Kriteria</th>
+            <th>Bobot Global</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for w in weights %}
+          <tr>
+            <td class="mono"><strong>{{ w.subcriteria_code }}</strong></td>
+            <td>{{ w.criteria_name }}</td>
+            <td>{{ w.subcriteria_name }}</td>
+            <td class="mono">{{ "%.4f"|format(w.criteria_weight) }}</td>
+            <td class="mono"><strong>{{ "%.4f"|format(w.global_weight) }}</strong></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<section class="card" style="margin-bottom:20px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+    <h2>Direktori 103 Petak Tersier D.I. Pante Lhong (5.853,74 ha)</h2>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <label for="parcel-search" class="skip-link">Cari petak</label>
+      <input id="parcel-search" type="search" placeholder="Cari kode petak atau saluran..." class="form-control" style="width:240px;">
+      <label for="parcel-risk-filter" class="skip-link">Filter risiko</label>
+      <select id="parcel-risk-filter" class="form-control" style="width:170px;">
+        <option value="">Semua Kategori</option>
+        <option value="Rendah">Rendah</option>
+        <option value="Sedang">Sedang</option>
+        <option value="Tinggi">Tinggi</option>
+        <option value="Sangat Tinggi">Sangat Tinggi</option>
+      </select>
+    </div>
+  </div>
+  <div class="table-wrap" style="max-height:420px; overflow-y:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Kode Petak</th>
+          <th>Sistem Saluran</th>
+          <th>Orientasi</th>
+          <th>Luas (ha)</th>
+          <th>Modulus (l/dt/ha)</th>
+          <th>CFAI Siaga</th>
+          <th>CFAI Awas</th>
+          <th>CFAI Ekstrem</th>
+          <th>Kelas (Awas)</th>
+        </tr>
+      </thead>
+      <tbody id="parcels-tbody">
+        {% for p in parcels %}
+        <tr>
+          <td class="mono"><strong>{{ p.kode_petak }}</strong></td>
+          <td>{{ p.sistem_saluran }}</td>
+          <td>{{ p.orientasi }}</td>
+          <td class="mono">{{ "%.2f"|format(p.area_ha) }}</td>
+          <td class="mono">{{ "%.3f"|format(p.modulus_l_s_ha) }}</td>
+          <td class="mono">{{ "%.4f"|format(p.cfai_siaga) }}</td>
+          <td class="mono">{{ "%.4f"|format(p.cfai_awas) }}</td>
+          <td class="mono">{{ "%.4f"|format(p.cfai_ekstrem) }}</td>
+          <td>
+            <span class="badge {% if p.risk_category == 'Rendah' %}badge-safe{% elif p.risk_category == 'Sedang' %}badge-warn{% elif p.risk_category == 'Tinggi' %}badge-alert{% else %}badge-danger{% endif %}">
+              {{ p.risk_category }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="grid-2" style="margin-bottom:20px;">
+  <article class="card">
+    <h2>Matriks Varietas Padi Lapangan</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kelompok Varietas</th>
+            <th>Status</th>
+            <th>Frekuensi SK</th>
+            <th>Catatan Parameter CROPDAM-X</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in varieties %}
+          <tr>
+            <td><strong>{{ v.kelompok_varietas }}</strong></td>
+            <td>{{ v.status_lapangan }}</td>
+            <td class="mono">{{ v.frekuensi_dalam_sk_2021_2025 }}</td>
+            <td>{{ v.catatan_penelitian_cropdam_x }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Riwayat Banjir BPBD Bireuen Terbaru (n={{ flood_events|length }})</h2>
+    <div class="table-wrap" style="max-height:360px; overflow-y:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Kecamatan</th>
+            <th>Desa / Gampong</th>
+            <th>Genangan Max (cm)</th>
+            <th>Faktor Hidrologis</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in flood_events %}
+          <tr>
+            <td class="mono">{{ f.event_date }}</td>
+            <td>{{ f.kecamatan }}</td>
+            <td>{{ f.desa }}</td>
+            <td class="mono">{{ f.inundation_depth_cm }}</td>
+            <td>{{ f.cause }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<section class="card">
+  <h2>Grafik Validasi Kurva Kerentanan &amp; Puso Historis</h2>
+  <div class="grid-2">
+    {% for ch in charts %}
+    <figure style="margin:0;">
+      <img
+        src="{{ url_for('api_datasets_chart', rel_path=ch.rel_path) }}"
+        alt="{{ ch.description }}"
+        width="640"
+        height="360"
+        class="gallery-img"
+        loading="lazy"
+      >
+      <figcaption class="muted" style="margin-top:6px;">{{ ch.filename }}: {{ ch.description }}</figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

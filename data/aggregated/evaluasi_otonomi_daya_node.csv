@@ -1,0 +1,4 @@
+Konfigurasi_Node,Kapasitas_Wh,Beban_Rata_W,Otonomi_Tanpa_Matahari_Jam,Min_SoC_Badai_Nov2025_Pct,Status_Target_72_Jam
+"node_hulu & node_hilir (3S Li-ion 57,72 Wh + Panel 10 Wp)",57.72,0.6804,84.8,67.2,MEMENUHI (>72 jam)
+"node_gateway Mode Penuh (VRLA 86,4 Wh + Panel 20 Wp + Router 4G)",86.4,3.15,27.4,0.0,BUTUH PLN / PANEL 30-50Wp
+"node_gateway Mode Hemat/PLN Backup (VRLA 86,4 Wh, Duty-Cycled 4G)",86.4,1.15,75.1,4.2,MEMENUHI (>72 jam)

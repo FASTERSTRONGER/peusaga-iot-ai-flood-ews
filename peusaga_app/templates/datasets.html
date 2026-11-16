@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}PEUSAGA - Katalog 13 Dataset &amp; Bukti Ilmiah{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Katalog Terpadu 13 Gugus Data Penelitian &amp; Galeri Bukti Ilmiah</h1>
+    <p class="muted">Akses baca-saja terhadap seluruh gugus data klimatologi, hidrologi BWS, ARR, jaringan D.I. Pante Lhong ({{ graph_summary.nodes }} simpul / {{ graph_summary.edges }} ruas), BPBD, dan telemetri IoT.</p>
+  </div>
+</div>
+
+<section class="card" style="margin-bottom:20px;">
+  <h2>Pratinjau Isi Berkas Dataset</h2>
+  <p class="muted">Pilih salah satu berkas dengan tombol Pratinjau pada katalog di bawah untuk memeriksa struktur kolom dan sampel data mentah.</p>
+  <div id="dataset-preview-meta" class="muted mono" style="margin-bottom:8px;">Belum ada berkas dipilih.</div>
+  <div id="dataset-preview-box" class="code-preview">Pilih berkas CSV, JSON, GeoJSON, atau Markdown dari daftar di bawah.</div>
+</section>
+
+<section class="grid-2" style="margin-bottom:20px;">
+  {% for group in catalog %}
+  <article class="card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:10px;">
+      <div>
+        <h3>{{ group.label }}</h3>
+        <div class="muted">{{ group.domain }} - {{ group.file_count }} berkas terindeks ({{ group.total_mb }} MB)</div>
+      </div>
+      <span class="badge badge-safe">Baca-Saja</span>
+    </div>
+    <div class="table-wrap" style="max-height:240px; overflow-y:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama Berkas</th>
+            <th>Tipe</th>
+            <th>Ukuran</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in group.files %}
+          <tr>
+            <td class="mono">{{ f.name }}</td>
+            <td class="mono">{{ f.ext | upper }}</td>
+            <td class="mono">{{ f.size_kb }} KB</td>
+            <td>
+              {% if f.previewable %}
+              <button
+                type="button"
+                class="btn btn-secondary btn-preview-dataset"
+                data-relpath="{{ f.rel_path }}"
+                style="padding:4px 10px; min-height:36px; font-size:0.8rem;"
+              >Pratinjau</button>
+              {% else %}
+              <span class="muted">Biner/Spasial</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2>Galeri Grafik Hasil Olah Data (14 Visualisasi Eksperimen)</h2>
+  <div class="grid-3">
+    {% for ch in charts %}
+    <figure style="margin:0;">
+      <img
+        src="{{ url_for('api_datasets_chart', rel_path=ch.rel_path) }}"
+        alt="{{ ch.description }}"
+        width="640"
+        height="360"
+        class="gallery-img"
+        loading="lazy"
+      >
+      <figcaption class="muted" style="margin-top:6px;">
+        <strong>{{ ch.module }}</strong> / {{ ch.filename }}<br>{{ ch.description }}
+      </figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

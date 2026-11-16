@@ -1,0 +1,165 @@
+{
+  "executed_at": "2026-11-16 16:08:25 WIB",
+  "exit_code": 0,
+  "duration_s": 81.23,
+  "total_checks": 31,
+  "passed": 31,
+  "failed": 0,
+  "checks": [
+    {
+      "status": "PASS",
+      "name": "Logo PNG Transparan",
+      "detail": "size=(512, 512), mode=RGBA, corner_alpha=0"
+    },
+    {
+      "status": "PASS",
+      "name": "MySQL Baseline Seeding",
+      "detail": "parcels=103 (5853.74 ha), telemetry=2618, flood_events=326"
+    },
+    {
+      "status": "PASS",
+      "name": "Posisi Baru 3 Node Pante Lhong",
+      "detail": "coords_ok=True, old_pos_count=0"
+    },
+    {
+      "status": "PASS",
+      "name": "Prediksi Historis & Keras 3 Node",
+      "detail": "total_per_node={'node_gateway': 871, 'node_hilir': 873, 'node_hulu': 2837}, keras_per_node={'node_gateway': 1, 'node_hilir': 1, 'node_hulu': 89}"
+    },
+    {
+      "status": "PASS",
+      "name": "HTML Route /",
+      "detail": "HTTP 200, h1=1, emdash=False, svg=False, clean=True"
+    },
+    {
+      "status": "PASS",
+      "name": "Landing Page Humanize & Pemisahan Menu Pengunjung",
+      "detail": "humanized=True, admin_menu_leaked=False"
+    },
+    {
+      "status": "PASS",
+      "name": "HTML Route /login",
+      "detail": "HTTP 200, h1=1, emdash=False, svg=False, clean=True"
+    },
+    {
+      "status": "PASS",
+      "name": "Route Guard & Proteksi API Tanpa Login",
+      "detail": "redirects_302=True, unauth_api=[401,401,401,401]"
+    },
+    {
+      "status": "PASS",
+      "name": "API Publik Landing Page (/api/status)",
+      "detail": "HTTP=200, nodes=3, overall=AWAS"
+    },
+    {
+      "status": "PASS",
+      "name": "Ingesti JSON /api (Tanpa Login Browser)",
+      "detail": "{'alert_level': 'SIAGA', 'cfai_score': 0.2767, 'node_id': 'node_hulu', 'pred_plus_3h_cm': 164.56, 'risk_category': 'Rendah', 'status': 'ok', 'timestamp': '2026-11-16 16:07:07', 'water_level_cm': 157.4}"
+    },
+    {
+      "status": "PASS",
+      "name": "Ingesti Arduino CSV /api_ews.php",
+      "detail": "{'alert_level': 'SIAGA', 'cfai_score': 0.2767, 'node_id': 'node_hilir', 'pred_plus_3h_cm': 133.45, 'risk_category': 'Rendah', 'status': 'ok', 'timestamp': '2026-11-16 16:08:12', 'water_level_cm': 120.0}"
+    },
+    {
+      "status": "PASS",
+      "name": "Karantina SOS & Auth Hardware",
+      "detail": "SOS HTTP=202, Invalid HTTP=401"
+    },
+    {
+      "status": "PASS",
+      "name": "Autentikasi Login Admin (/login)",
+      "detail": "bad=401, good_redirect=/dashboard"
+    },
+    {
+      "status": "PASS",
+      "name": "HTML Route /dashboard",
+      "detail": "HTTP 200, h1=1, emdash=False, svg=False, clean=True"
+    },
+    {
+      "status": "PASS",
+      "name": "Navbar Admin Setelah Login",
+      "detail": "Menu operasional dan tombol Keluar tampil saat sesi admin aktif"
+    },
+    {
+      "status": "PASS",
+      "name": "HTML Route /ai-lstm",
+      "detail": "HTTP 200, h1=1, emdash=False, svg=False, clean=True"
+    },
+    {
+      "status": "PASS",
+      "name": "HTML Route /cropdamx",
+      "detail": "HTTP 200, h1=1, emdash=False, svg=False, clean=True"
+    },
+    {
+      "status": "PASS",
+      "name": "HTML Route /console",
+      "detail": "HTTP 200, h1=1, emdash=False, svg=False, clean=True"
+    },
+    {
+      "status": "PASS",
+      "name": "HTML Route /datasets",
+      "detail": "HTTP 200, h1=1, emdash=False, svg=False, clean=True"
+    },
+    {
+      "status": "PASS",
+      "name": "HTML Route /admin",
+      "detail": "HTTP 200, h1=1, emdash=False, svg=False, clean=True"
+    },
+    {
+      "status": "PASS",
+      "name": "Keras LSTM & Simulasi 3 Node",
+      "detail": "t+3h={'node_hulu': 164.56, 'node_hilir': 133.45, 'node_gateway': 217.74}, sim_all=3 node"
+    },
+    {
+      "status": "PASS",
+      "name": "AHP-CROPDAM-X & Surrogate",
+      "detail": "CFAI=0.5901, RF=0.598, sigma=0.5747"
+    },
+    {
+      "status": "PASS",
+      "name": "Filter Petak Tersier",
+      "detail": "matched=3"
+    },
+    {
+      "status": "PASS",
+      "name": "WebGIS Multi-Layer Payload",
+      "detail": "iot_nodes=3, parcels=103, cad_sawah=2628, structures=137, channels=400, boundaries=364"
+    },
+    {
+      "status": "PASS",
+      "name": "WebGIS CAD Extras Lazy-Load",
+      "detail": "status=200, pemukiman=1423, roads=1301"
+    },
+    {
+      "status": "PASS",
+      "name": "Webhook Broadcast Dry-Run",
+      "detail": "SIMULATED OK"
+    },
+    {
+      "status": "PASS",
+      "name": "Kalkulator Teknik LoRa & Daya",
+      "detail": "RSSI=-98.68 dBm, autonomy=84.8h"
+    },
+    {
+      "status": "PASS",
+      "name": "Dataset Preview & Path Guard",
+      "detail": "csv=200, traversal_blocked=400, chart=200"
+    },
+    {
+      "status": "PASS",
+      "name": "Logout Menghapus Sesi",
+      "detail": "logout=302, post_logout_dashboard=302"
+    },
+    {
+      "status": "PASS",
+      "name": "Koordinat (X, Y) Peta WebGIS",
+      "detail": "Fungsi & label koordinat X/Y geografis + UTM 47N tersedia pada seluruh layer peta"
+    },
+    {
+      "status": "PASS",
+      "name": "Higienitas Kode & Keamanan Path",
+      "detail": "Bersih"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Jumlah_Node_N,Unit_Cadangan,Redundansi_Pct,C_Lead_Time,C_Irigasi_Pct,C_ERA5_Spatial,PDR_E2E_Pct,Latensi_Hop_Detik,R_LoRa_Score,E_HW_Spare,Estimasi_CAPEX_Juta_Rp,Utilitas_Komposit_U,Delta_Irigasi_Pct,Status_Solusi
+1,4,400.0,0.15,24.5,0.42,45.0,0.4,0.45,1.0,1.32,0.4018,24.5,Sub-Optimal (Buta Hulu)
+2,3,150.0,0.6144,64.0,0.74,76.8,0.85,0.768,0.92,2.63,0.7162,39.5,Sub-Optimal (NLOS Blind-Spot)
+3,2,66.7,0.97,95.2,0.955,99.1,1.89,0.991,0.84,3.95,0.948,31.200000000000003,OPTIMUM PARETO (Knee Point)
+4,1,25.0,0.985,97.6,0.968,96.2,3.45,0.9402,0.62,5.26,0.9165,2.3999999999999915,Jenuh Spasial (1 Spare)
+5,0,0.0,0.995,99.0,0.976,93.1,5.1,0.8845,0.35,6.58,0.872,1.4000000000000057,Rentan (0 Spare)
+6,-1,0.0,1.0,100.0,0.98,89.6,6.85,0.8233,0.12,7.89,0.8296,1.0,Over-Provisioned (Defisit Unit)
