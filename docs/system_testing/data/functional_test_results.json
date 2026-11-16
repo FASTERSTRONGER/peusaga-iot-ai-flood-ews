@@ -1,7 +1,7 @@
 {
-  "executed_at": "2026-11-16 16:08:25 WIB",
+  "executed_at": "2026-11-16 17:39:44 WIB",
   "exit_code": 0,
-  "duration_s": 81.23,
+  "duration_s": 11.72,
   "total_checks": 31,
   "passed": 31,
   "failed": 0,
@@ -24,7 +24,7 @@
     {
       "status": "PASS",
       "name": "Prediksi Historis & Keras 3 Node",
-      "detail": "total_per_node={'node_gateway': 871, 'node_hilir': 873, 'node_hulu': 2837}, keras_per_node={'node_gateway': 1, 'node_hilir': 1, 'node_hulu': 89}"
+      "detail": "total_per_node={'node_gateway': 871, 'node_hilir': 873, 'node_hulu': 2859}, keras_per_node={'node_gateway': 1, 'node_hilir': 1, 'node_hulu': 111}"
     },
     {
       "status": "PASS",
@@ -54,12 +54,12 @@
     {
       "status": "PASS",
       "name": "Ingesti JSON /api (Tanpa Login Browser)",
-      "detail": "{'alert_level': 'SIAGA', 'cfai_score': 0.2767, 'node_id': 'node_hulu', 'pred_plus_3h_cm': 164.56, 'risk_category': 'Rendah', 'status': 'ok', 'timestamp': '2026-11-16 16:07:07', 'water_level_cm': 157.4}"
+      "detail": "{'alert_level': 'AWAS', 'cfai_score': 0.2767, 'node_id': 'node_hulu', 'pred_plus_3h_cm': 179.87, 'risk_category': 'Rendah', 'status': 'ok', 'timestamp': '2026-11-16 17:39:35', 'water_level_cm': 157.4}"
     },
     {
       "status": "PASS",
       "name": "Ingesti Arduino CSV /api_ews.php",
-      "detail": "{'alert_level': 'SIAGA', 'cfai_score': 0.2767, 'node_id': 'node_hilir', 'pred_plus_3h_cm': 133.45, 'risk_category': 'Rendah', 'status': 'ok', 'timestamp': '2026-11-16 16:08:12', 'water_level_cm': 120.0}"
+      "detail": "{'alert_level': 'SIAGA', 'cfai_score': 0.2767, 'node_id': 'node_hilir', 'pred_plus_3h_cm': 134.51, 'risk_category': 'Rendah', 'status': 'ok', 'timestamp': '2026-11-16 17:39:37', 'water_level_cm': 120.0}"
     },
     {
       "status": "PASS",
@@ -109,7 +109,7 @@
     {
       "status": "PASS",
       "name": "Keras LSTM & Simulasi 3 Node",
-      "detail": "t+3h={'node_hulu': 164.56, 'node_hilir': 133.45, 'node_gateway': 217.74}, sim_all=3 node"
+      "detail": "t+3h={'node_hulu': 178.77, 'node_hilir': 136.85, 'node_gateway': 225.55}, sim_all=3 node"
     },
     {
       "status": "PASS",

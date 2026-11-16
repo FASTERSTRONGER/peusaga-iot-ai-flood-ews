@@ -33,7 +33,7 @@ PLOT_DESCRIPTIONS: Dict[str, str] = {
     "01_eda_seri_waktu_tma.png": "Seri waktu harian TMA Keureuto (2015-2024) & sub-harian Krueng Simpo.",
     "02_perbandingan_prediksi_harian.png": "Komparasi performa model LSTM skala harian (A1-A4).",
     "03_perbandingan_interpolasi_1h.png": "Evaluasi metode interpolasi temporal PCHIP vs Linear & Spline.",
-    "04_best_hourly_lstm_result.png": "Hasil evaluasi model LSTM terbaik per jam (C2_Ablasi_Units_256_128, t+3 jam).",
+    "04_best_hourly_lstm_result.png": "Hasil evaluasi model LSTM terbaik per jam (C2_Ablation_Units_256_128_Adam_1e-3, t+3 jam).",
     "05_uji_lapangan_iot_zeroshot.png": "Validasi zero-shot pada data uji lapangan IoT DAS Peusangan.",
     "01_ahp_bobot_kriteria.png": "Struktur hirarki bobot global AHP konsolidasi 5 pakar (CR = 0.00000).",
     "02_cropdamx_kurva_kerentanan.png": "Kurva kerentanan logistik CROPDAM-X & validasi Random Forest / Bayesian Ridge.",
